@@ -23,5 +23,4 @@ public class SavesyncServerApplication {
             storageService.init();
         };
     }
-
 }

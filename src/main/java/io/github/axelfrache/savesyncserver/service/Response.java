@@ -1,15 +1,14 @@
 package io.github.axelfrache.savesyncserver.service;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Setter
+@Getter
 public class Response {
-    private String fileName;
-    private String downloadUrl;
-    private String fileType;
-    private long fileSize;
+    private String message;
+
+    public Response(String message) {
+        this.message = message;
+    }
 }

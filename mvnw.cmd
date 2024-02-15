@@ -1,10 +1,10 @@
 @REM ----------------------------------------------------------------------------
 @REM Licensed to the Apache Software Foundation (ASF) under one
-@REM or more contributor license agreements.  See the NOTICE file
+@REM or more contributor license agreements.  See the NOTICE fileInfo
 @REM distributed with this work for additional information
-@REM regarding copyright ownership.  The ASF licenses this file
+@REM regarding copyright ownership.  The ASF licenses this fileInfo
 @REM to you under the Apache License, Version 2.0 (the
-@REM "License"); you may not use this file except in compliance
+@REM "License"); you may not use this fileInfo except in compliance
 @REM with the License.  You may obtain a copy of the License at
 @REM
 @REM    https://www.apache.org/licenses/LICENSE-2.0
@@ -29,7 +29,7 @@
 @REM MAVEN_OPTS - parameters passed to the Java VM when running Maven
 @REM     e.g. to debug Maven itself, use
 @REM set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000
-@REM MAVEN_SKIP_RC - flag to disable loading of mavenrc files
+@REM MAVEN_SKIP_RC - flag to disable loading of mavenrc fileInfos
 @REM ----------------------------------------------------------------------------
 
 @REM Begin all REM lines with '@' in case MAVEN_BATCH_ECHO is 'on'
@@ -153,7 +153,7 @@ if exist %WRAPPER_JAR% (
 )
 @REM End of extension
 
-@REM If specified, validate the SHA-256 sum of the Maven wrapper jar file
+@REM If specified, validate the SHA-256 sum of the Maven wrapper jar fileInfo
 SET WRAPPER_SHA_256_SUM=""
 FOR /F "usebackq tokens=1,2 delims==" %%A IN ("%MAVEN_PROJECTBASEDIR%\.mvn\wrapper\maven-wrapper.properties") DO (
     IF "%%A"=="wrapperSha256Sum" SET WRAPPER_SHA_256_SUM=%%B

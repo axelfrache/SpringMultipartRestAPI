@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 public class FileInfo {
     private String name;
-    private String url;
+    private String downloadUrl;
 }

@@ -48,37 +48,37 @@ public class FileInfoController {
 
     @GetMapping("/files")
     public ResponseEntity<List<FileInfo>> getListFiles() {
-        List<FileInfo> fileInfos = storageService.loadAll().map(path -> {
-            String filename = path.getFileName().toString();
+        List<FileInfo> fileInfos = storageService.readAll().map(path -> {
+            String fileName = path.getFileName().toString();
             String url = MvcUriComponentsBuilder
                     .fromMethodName(FileInfoController.class, "getFile", path.getFileName().toString()).build().toString();
 
-            return new FileInfo(filename, url);
+            return new FileInfo(fileName, url);
         }).collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(fileInfos);
     }
 
-    @GetMapping("/files/{filename:.+}")
-    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
-        Resource file = storageService.load(filename);
+    @GetMapping("/files/{fileName:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String fileName) {
+        Resource file = storageService.read(fileName);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
     }
 
-    @DeleteMapping("/files/{filename:.+}")
-    public ResponseEntity<DeleteResponse> deleteFile(@PathVariable String filename) {
+    @DeleteMapping("/files/{fileName:.+}")
+    public ResponseEntity<DeleteResponse> deleteFile(@PathVariable String fileName) {
 
         try {
-            boolean existed = storageService.delete(filename);
+            boolean existed = storageService.delete(fileName);
 
             if (existed) {
-                return ResponseEntity.status(HttpStatus.OK).body(new DeleteResponse("File " + filename + " has been deleted successfully"));
+                return ResponseEntity.status(HttpStatus.OK).body(new DeleteResponse("File " + fileName + " has been deleted successfully"));
             }
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new DeleteResponse("File " + filename + " not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new DeleteResponse("File " + fileName + " not found"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new DeleteResponse("Failed to delete " + filename + ": " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new DeleteResponse("Failed to delete " + fileName + ": " + e.getMessage()));
         }
     }
 }

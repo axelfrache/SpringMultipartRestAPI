@@ -9,10 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -26,52 +26,55 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize storage folder");
+            throw new IllegalStateException("Could not initialize storage", e);
         }
     }
 
     @Override
     public void save(MultipartFile file) {
+        String filename = Objects.requireNonNull(file.getOriginalFilename());
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(Objects.requireNonNull(file.getOriginalFilename())));
-        } catch (Exception e) {
-            if (e instanceof FileAlreadyExistsException) {
-                throw new RuntimeException("Filler of that name already exists");
+            Path destinationFile = this.root.resolve(Paths.get(filename)).normalize().toAbsolutePath();
+            if (!destinationFile.getParent().equals(this.root.toAbsolutePath())) {
+                // Security check
+                throw new IllegalStateException("Cannot store file outside current directory.");
             }
-
-            throw new RuntimeException(e.getMessage());
+            Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to store file.", e);
         }
     }
 
     @Override
     public void saveAll(List<MultipartFile> files) {
-        for (MultipartFile file : files) {
-            save(file);
-        }
+        files.forEach(this::save);
     }
-    @Override
-    public Resource load(String filename) {
-        try {
-            Path file = root.resolve(filename);
-            Resource resource = new UrlResource(file.toUri());
 
+    @Override
+    public Resource read(String fileName) {
+        try {
+            Path file = root.resolve(fileName).normalize().toAbsolutePath();
+            if (!file.startsWith(root.toAbsolutePath())) {
+                throw new IllegalStateException("Resolution of the path is outside the storage directory");
+            }
+            Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
             } else {
-                throw new RuntimeException("File could not be read)");
+                throw new IllegalStateException("File not found or not readable");
             }
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new IllegalStateException("Failed to read file", e);
         }
     }
 
     @Override
-    public boolean delete(String filename) {
+    public boolean delete(String fileName) {
         try {
-            Path file = root.resolve(filename);
+            Path file = root.resolve(fileName);
             return Files.deleteIfExists(file);
         } catch (IOException e) {
-            throw new RuntimeException("Error: " + e.getMessage());
+            throw new IllegalStateException("Failed to delete file", e);
         }
     }
 
@@ -81,11 +84,13 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Stream<Path> loadAll() {
+    public Stream<Path> readAll() {
         try {
-            return Files.walk(this.root, 1).filter(path -> !path.equals(this.root)).map(this.root::relativize);
+            return Files.walk(this.root, 1)
+                    .filter(path -> !path.equals(this.root))
+                    .map(this.root::relativize);
         } catch (IOException e) {
-            throw new RuntimeException("Files could not be loaded");
+            throw new IllegalStateException("Failed to read stored files", e);
         }
     }
 }

@@ -12,13 +12,13 @@ SpringMultipartRestAPI is a Spring Boot application designed to facilitate the u
 
 To get started with SpringMultipartRestAPI, ensure you have Java and Maven installed on your system. Follow these steps to run the application:
 
-Clone the repository:
+**Clone the repository:**
 ```bash
 git clone https://github.com/yourusername/SpringMultipartRestAPI.git
 cd SpringMultipartRestAPI
 ```
 
-Run the application using Maven:
+**Run the application using Maven:**
 ```bash
 mvn spring-boot:run
 ```

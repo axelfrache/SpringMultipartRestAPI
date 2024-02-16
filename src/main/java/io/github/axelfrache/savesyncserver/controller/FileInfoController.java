@@ -30,14 +30,14 @@ public class FileInfoController {
         List<UploadResponse> responseList = new ArrayList<>();
         try {
             for (MultipartFile file : files) {
-                String filename = file.getOriginalFilename();
-                assert filename != null;
+                String fileName = file.getOriginalFilename();
+                assert fileName != null;
                 String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                         .path("/api/savesync/files/")
-                        .path(filename)
+                        .path(fileName)
                         .toUriString();
                 storageService.save(file);
-                UploadResponse response = new UploadResponse(filename, downloadUrl, file.getContentType(), file.getSize());
+                UploadResponse response = new UploadResponse(fileName, downloadUrl, file.getContentType(), file.getSize());
                 responseList.add(response);
             }
         } catch (Exception e) {

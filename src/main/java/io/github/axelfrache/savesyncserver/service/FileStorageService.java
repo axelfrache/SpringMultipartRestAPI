@@ -14,9 +14,9 @@ public interface FileStorageService {
 
     void saveAll(List<MultipartFile> files);
 
-    Resource read(String filename);
+    Resource read(String fileName);
 
-    boolean delete(String filename);
+    boolean delete(String fileName);
 
     void deleteAll();
 

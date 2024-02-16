@@ -30,13 +30,13 @@ You can access the application at http://localhost:8080.
 
 The application defines the following RESTful endpoints:
 
-- **Upload Files:** POST /api/savesync/upload
+- **Upload Files: POST /api/savesync/upload**
   - Accepts multipart/form-data requests with one or more files.
-- **List Files:** GET /api/savesync/files
+- **List Files: GET /api/savesync/files**
   - Returns a list of all files uploaded to the server, including their download URLs.
-- **Download File:** GET /api/savesync/files/{fileName}
+- **Download File: GET /api/savesync/files/{fileName}**
   - Downloads the specified file. Replace {fileName} with the actual name of the file you wish to download.
-- **Delete File:** DELETE /api/savesync/files/{fileName} 
+- **Delete File: DELETE /api/savesync/files/{fileName}**
   - Deletes the specified file from the server.
 
 ## Usage Example

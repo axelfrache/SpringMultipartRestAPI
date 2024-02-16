@@ -1,8 +1,9 @@
 package io.github.axelfrache.savesyncserver.controller;
 
 import io.github.axelfrache.savesyncserver.model.FileInfo;
+import io.github.axelfrache.savesyncserver.response.UploadResponse;
 import io.github.axelfrache.savesyncserver.service.FileStorageService;
-import io.github.axelfrache.savesyncserver.service.Response;
+import io.github.axelfrache.savesyncserver.response.DeleteResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,21 +21,29 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/savesync")
 public class FileInfoController {
+
     @Autowired
     FileStorageService storageService;
 
     @PostMapping("/upload")
-    public ResponseEntity<Response> uploadFile(@RequestParam("file") MultipartFile file) {
-        String message = "";
+    public ResponseEntity<List<UploadResponse>> uploadFile(@RequestParam("file") MultipartFile[] files) {
+        List<UploadResponse> responseList = new ArrayList<>();
         try {
-            storageService.save(file);
-
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(new Response(message));
+            for (MultipartFile file : files) {
+                String filename = file.getOriginalFilename();
+                assert filename != null;
+                String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/api/savesync/files/")
+                        .path(filename)
+                        .toUriString();
+                storageService.save(file);
+                UploadResponse response = new UploadResponse(filename, downloadUrl, file.getContentType(), file.getSize());
+                responseList.add(response);
+            }
         } catch (Exception e) {
-            message = "Could not upload the file: " + file.getOriginalFilename() + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new Response(message));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        return ResponseEntity.ok(responseList);
     }
 
     @GetMapping("/files")
@@ -57,22 +67,18 @@ public class FileInfoController {
     }
 
     @DeleteMapping("/files/{filename:.+}")
-    public ResponseEntity<Response> deleteFile(@PathVariable String filename) {
-        String message = "";
+    public ResponseEntity<DeleteResponse> deleteFile(@PathVariable String filename) {
 
         try {
             boolean existed = storageService.delete(filename);
 
             if (existed) {
-                message = "Delete the file successfully: " + filename;
-                return ResponseEntity.status(HttpStatus.OK).body(new Response(message));
+                return ResponseEntity.status(HttpStatus.OK).body(new DeleteResponse("File " + filename + " has been deleted successfully"));
             }
 
-            message = "The file does not exist!";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Response(message));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new DeleteResponse("File " + filename + " not found"));
         } catch (Exception e) {
-            message = "Could not delete the file: " + filename + ". Error: " + e.getMessage();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(message));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new DeleteResponse("Failed to delete " + filename + ": " + e.getMessage()));
         }
     }
 }

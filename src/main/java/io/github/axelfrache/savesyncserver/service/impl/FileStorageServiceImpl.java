@@ -13,6 +13,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -35,13 +36,19 @@ public class FileStorageServiceImpl implements FileStorageService {
             Files.copy(file.getInputStream(), this.root.resolve(Objects.requireNonNull(file.getOriginalFilename())));
         } catch (Exception e) {
             if (e instanceof FileAlreadyExistsException) {
-                throw new RuntimeException("Filler of that name already exists.");
+                throw new RuntimeException("Filler of that name already exists");
             }
 
             throw new RuntimeException(e.getMessage());
         }
     }
 
+    @Override
+    public void saveAll(List<MultipartFile> files) {
+        for (MultipartFile file : files) {
+            save(file);
+        }
+    }
     @Override
     public Resource load(String filename) {
         try {

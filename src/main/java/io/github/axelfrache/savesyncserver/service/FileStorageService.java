@@ -1,7 +1,6 @@
 package io.github.axelfrache.savesyncserver.service;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
@@ -12,8 +11,6 @@ public interface FileStorageService {
 
     void save(MultipartFile file);
 
-    void saveAll(List<MultipartFile> files);
-
     Resource read(String fileName);
 
     boolean delete(String fileName);
@@ -21,4 +18,6 @@ public interface FileStorageService {
     void deleteAll();
 
     Stream<Path> readAll();
+
+    void saveAll(MultipartFile file, String relativePath);
 }

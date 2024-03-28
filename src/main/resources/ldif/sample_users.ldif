@@ -1,0 +1,30 @@
+dn: ou=users,dc=example,dc=org
+objectClass: organizationalUnit
+ou: utilisateurs
+
+dn: uid=admin,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: admin
+cn: Admin
+sn: Admin
+givenName: Admin
+userPassword: admin
+mail: admin@example.com
+
+dn: uid=ggonfiantini,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: ggonfiantini
+cn: Gaëtan Gonfiantini
+sn: Gonfiantini
+givenName: Gaëtan
+userPassword: gaga
+mail: gaetan.gonfiantini@example.com
+
+dn: uid=afrache,ou=users,dc=example,dc=org
+objectClass: inetOrgPerson
+uid: afrache
+cn: Axel Frache
+sn: Frache
+givenName: Axel
+userPassword: axax
+mail: axel.frache@example.com

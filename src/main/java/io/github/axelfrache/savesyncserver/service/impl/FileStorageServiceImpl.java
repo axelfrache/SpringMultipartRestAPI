@@ -46,8 +46,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public void saveAll(List<MultipartFile> files) {
-        files.forEach(this::save);
+    public void saveAll(MultipartFile file, String relativePath) {
+        try {
+            Path destinationPath = this.root.resolve(relativePath).normalize().toAbsolutePath();
+            Files.createDirectories(destinationPath.getParent());
+
+            if (!destinationPath.getParent().startsWith(this.root.toAbsolutePath())) {
+                throw new IllegalStateException("Cannot store file outside current directory.");
+            }
+            Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to store file.", e);
+        }
     }
 
     @Override
@@ -93,4 +103,5 @@ public class FileStorageServiceImpl implements FileStorageService {
             throw new IllegalStateException("Failed to read stored files", e);
         }
     }
+
 }

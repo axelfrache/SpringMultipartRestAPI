@@ -13,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,25 +26,29 @@ public class FileInfoController {
     FileStorageService storageService;
 
     @PostMapping("/upload")
-    public ResponseEntity<List<UploadResponse>> uploadFile(@RequestParam("file") MultipartFile[] files) {
-        List<UploadResponse> responseList = new ArrayList<>();
-        try {
-            for (MultipartFile file : files) {
-                String fileName = file.getOriginalFilename();
-                assert fileName != null;
-                String downloadUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/api/savesync/files/")
-                        .path(fileName)
-                        .toUriString();
-                storageService.save(file);
-                UploadResponse response = new UploadResponse(fileName, downloadUrl, file.getContentType(), file.getSize());
-                responseList.add(response);
+    public ResponseEntity<List<UploadResponse>> uploadFiles(@RequestPart("files") MultipartFile[] files) {
+        String backupId = String.valueOf(System.currentTimeMillis());
+        String versionPath = "storage/" + backupId;
+
+        List<UploadResponse> responses = new ArrayList<>();
+        for (MultipartFile file : files) {
+            try {
+                String filePath = versionPath + "/" + file.getOriginalFilename();
+                storageService.saveAll(file, filePath);
+
+                String downloadUrl = MvcUriComponentsBuilder
+                        .fromMethodName(FileInfoController.class, "getFile", filePath).build().toUri().toString();
+
+                responses.add(new UploadResponse(file.getOriginalFilename(), downloadUrl, file.getContentType(), file.getSize()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
             }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        return ResponseEntity.ok(responseList);
+
+        return ResponseEntity.ok(responses);
     }
+
 
     @GetMapping("/files")
     public ResponseEntity<List<FileInfo>> getListFiles() {
@@ -81,4 +85,17 @@ public class FileInfoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new DeleteResponse("Failed to delete " + fileName + ": " + e.getMessage()));
         }
     }
+
+    @GetMapping("/backups")
+    public ResponseEntity<List<String>> getBackups() {
+        File storageDir = new File("storage/");
+        String[] backups = storageDir.list((current, name) -> new File(current, name).isDirectory());
+
+        if (backups != null) {
+            return ResponseEntity.ok(Arrays.asList(backups));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
 }
